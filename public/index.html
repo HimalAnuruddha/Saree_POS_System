@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>සාරි POS - වෙන්කිරීම් පද්ධතිය</title>
+    <meta name="description" content="සාරි සාප්පුව සඳහා POS සහ වෙන්කිරීම් පද්ධතිය">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- =============== SIDEBAR =============== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">👗</span>
+                <div class="logo-text">
+                    <h1>සාරි POS</h1>
+                    <span class="logo-sub">වෙන්කිරීම් පද්ධතිය</span>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">මුල් පිටුව</span>
+            </a>
+            <a href="#" class="nav-item" data-page="inventory" id="nav-inventory">
+                <span class="nav-icon">👗</span>
+                <span class="nav-text">සාරි ලේඛනය</span>
+            </a>
+            <a href="#" class="nav-item" data-page="booking" id="nav-booking">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">නව Booking එකක්</span>
+            </a>
+            <a href="#" class="nav-item" data-page="bookings-list" id="nav-bookings-list">
+                <span class="nav-icon">📅</span>
+                <span class="nav-text">Booking බලන්න</span>
+            </a>
+            <a href="#" class="nav-item" data-page="scanner" id="nav-scanner">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">බාර්කෝඩ් ස්කෑනරය</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-text">© 2026 සාරි POS</div>
+        </div>
+    </aside>
+
+    <!-- =============== MAIN CONTENT =============== -->
+    <main class="main-content" id="main-content">
+
+        <!-- ===== DASHBOARD PAGE ===== -->
+        <section class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h2 class="page-title">🏠 මුල් පිටුව</h2>
+                <div class="page-date" id="current-date"></div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card stat-purple" onclick="filterDashboard('all')" style="cursor: pointer;">
+                    <div class="stat-icon">👗</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-total-sarees">0</div>
+                        <div class="stat-label">මුළු සාරි</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-blue" onclick="filterDashboard('upcoming')" style="cursor: pointer;">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-active-bookings">0</div>
+                        <div class="stat-label">ක්‍රියාකාරී Bookings</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-green" onclick="filterDashboard('today')" style="cursor: pointer;">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-today-pickups">0</div>
+                        <div class="stat-label">අද රැගෙන යන Bookings</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-info" onclick="filterDashboard('returns')" style="cursor: pointer;">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-today-returns">0</div>
+                        <div class="stat-label">අද ආපසු දෙන Bookings</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-red" onclick="filterDashboard('overdue')" style="cursor: pointer;">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-overdue">0</div>
+                        <div class="stat-label">ප්‍රමාද වූ Bookings</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Today's Pickups -->
+                <div class="card" id="today-card">
+                    <div class="card-header">
+                        <h3>📅 අද රැගෙන යන Bookings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="today-bookings-list" class="booking-list">
+                            <div class="empty-state">අද සඳහා Bookings නොමැත</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Returns -->
+                <div class="card" id="returns-card">
+                    <div class="card-header">
+                        <h3>📦 අද ආපසු දෙන Bookings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="today-returns-list" class="booking-list">
+                            <div class="empty-state">අද ආපසු දෙන Bookings නොමැත</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Tomorrow's Pickups -->
+                <div class="card" id="tomorrow-card">
+                    <div class="card-header">
+                        <h3>🔜 හෙට රැගෙන යන Bookings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="tomorrow-bookings-list" class="booking-list">
+                            <div class="empty-state">හෙට සඳහා Bookings නොමැත</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming -->
+                <div class="card" id="upcoming-card">
+                    <div class="card-header">
+                        <h3>📋 ඉදිරි Bookings (දින 20 ක්)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="upcoming-bookings-list" class="booking-list">
+                            <div class="empty-state">ඉදිරි වෙන්කිරීම් නොමැත</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overdue -->
+            <div class="card" id="overdue-card" style="display:none;">
+                <div class="card-header card-header-danger">
+                    <h3>⚠️ ප්‍රමාද වූ Bookings (රැගෙන නොගිය හෝ ආපසු නොදුන්)</h3>
+                </div>
+                <div class="card-body">
+                    <div id="overdue-bookings-list" class="booking-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== INVENTORY PAGE ===== -->
+        <section class="page" id="page-inventory">
+            <div class="page-header">
+                <h2 class="page-title">👗 සාරි ලේඛනය</h2>
+                <button class="btn btn-primary" onclick="showAddSareeForm()">
+                    <span>➕</span> නව සාරියක් එකතු කරන්න
+                </button>
+            </div>
+
+            <!-- Add Saree Form (hidden by default) -->
+            <div class="card" id="add-saree-form" style="display:none;">
+                <div class="card-header">
+                    <h3>➕ නව සාරියක් එකතු කරන්න</h3>
+                    <button class="btn btn-ghost" onclick="hideAddSareeForm()">✕</button>
+                </div>
+                <div class="card-body">
+                    <form id="saree-form" enctype="multipart/form-data">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="saree-name">සාරියේ නම *</label>
+                                <input type="text" id="saree-name" placeholder="උදා: රතු පට සාරිය" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="saree-price">මිල (රු.)</label>
+                                <input type="number" id="saree-price" placeholder="උදා: 5000" step="0.01">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="saree-description">විස්තරය</label>
+                                <textarea id="saree-description" placeholder="සාරිය ගැන විස්තර..." rows="2"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="saree-image">පින්තූරය</label>
+                                <div class="file-upload" id="file-upload-area">
+                                    <input type="file" id="saree-image" accept="image/*" hidden>
+                                    <div class="file-upload-content" onclick="document.getElementById('saree-image').click()">
+                                        <span class="file-upload-icon">📷</span>
+                                        <span>පින්තූරය තෝරන්න හෝ මෙහි අදින්න</span>
+                                    </div>
+                                    <div class="file-preview" id="file-preview" style="display:none;">
+                                        <img id="preview-img" src="" alt="preview">
+                                        <button type="button" class="btn btn-ghost btn-sm" onclick="clearImagePreview()">✕ ඉවත් කරන්න</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-ghost" onclick="hideAddSareeForm()">අවලංගු කරන්න</button>
+                            <button type="submit" class="btn btn-primary">💾 සුරකින්න</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Saree Grid -->
+            <div class="saree-grid" id="saree-grid">
+                <div class="empty-state">
+                    <span class="empty-icon">👗</span>
+                    <p>සාරි එකතු කර නැත</p>
+                    <p class="empty-sub">ඉහත බොත්තම ඔබා නව සාරි එකතු කරන්න</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== BOOKING PAGE ===== -->
+        <section class="page" id="page-booking">
+            <div class="page-header">
+                <h2 class="page-title">📋 නව Booking එකක්</h2>
+            </div>
+
+            <div class="booking-layout">
+                <!-- Left: Customer & Details -->
+                <div class="booking-left">
+                    <!-- Customer Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>👤 පාරිභෝගික තොරතුරු</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="customer-phone">දුරකථන අංකය *</label>
+                                <div class="input-with-btn">
+                                    <input type="tel" id="customer-phone" placeholder="07XXXXXXXX">
+                                    <button type="button" class="btn btn-secondary" onclick="searchCustomer()">🔍 සොයන්න</button>
+                                </div>
+                                <div class="search-status" id="customer-search-status"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-name">නම *</label>
+                                <input type="text" id="customer-name" placeholder="පාරිභෝගිකයාගේ නම">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-address">ලිපිනය</label>
+                                <textarea id="customer-address" placeholder="ලිපිනය" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Dates -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📅 දින තොරතුරු</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="pickup-date">රැගෙන යන දිනය *</label>
+                                    <input type="text" id="pickup-date" class="datepicker">
+                                </div>
+                                <div class="form-group">
+                                    <label for="return-date">ආපසු දෙන දිනය</label>
+                                    <input type="text" id="return-date" class="datepicker">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scan / Add Items -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>🔍 බඩු එකතු කරන්න</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Barcode Scan -->
+                            <div class="form-group">
+                                <label>බාර්කෝඩ් ස්කෑන් කරන්න</label>
+                                <div class="input-with-btn">
+                                    <input type="text" id="booking-barcode-input" placeholder="බාර්කෝඩ් අංකය ටයිප් කරන්න හෝ ස්කෑන් කරන්න" autofocus>
+                                    <button type="button" class="btn btn-secondary" onclick="scanBarcodeForBooking()">🔍 සොයන්න</button>
+                                </div>
+                            </div>
+
+                            <!-- Scanned Item Preview -->
+                            <div id="scanned-item-preview" class="scanned-preview" style="display:none;">
+                                <div class="scanned-info">
+                                    <img id="scanned-img" src="" alt="" class="scanned-img">
+                                    <div class="scanned-details">
+                                        <div class="scanned-name" id="scanned-name"></div>
+                                        <div class="scanned-barcode" id="scanned-barcode-display"></div>
+                                        <div class="scanned-status" id="scanned-status"></div>
+                                    </div>
+                                </div>
+                                <div class="scanned-actions">
+                                    <div class="form-group">
+                                        <label>මිල (රු.) *</label>
+                                        <input type="number" id="scanned-price" placeholder="මිල ටයිප් කරන්න" step="0.01">
+                                    </div>
+                                    <button type="button" class="btn btn-primary" onclick="addScannedItemToBooking()">➕ බිල්පතට එකතු කරන්න</button>
+                                </div>
+                            </div>
+
+                            <hr class="divider">
+
+                            <!-- Manual Item Add -->
+                            <div class="form-group">
+                                <label>අතින් බඩු එකතු කරන්න</label>
+                                <div class="manual-item-form">
+                                    <input type="text" id="manual-item-name" placeholder="බඩුවේ නම">
+                                    <input type="number" id="manual-item-price" placeholder="මිල (රු.)" step="0.01">
+                                    <button type="button" class="btn btn-secondary" onclick="addManualItem()">➕ එකතු කරන්න</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Bill Summary -->
+                <div class="booking-right">
+                    <div class="card bill-card">
+                        <div class="card-header">
+                            <h3>🧾 බිල්පත</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Bill Items -->
+                            <div class="bill-items" id="bill-items">
+                                <div class="empty-state empty-sm">
+                                    <p>බඩු එකතු කර නැත</p>
+                                </div>
+                            </div>
+
+                            <!-- Bill Totals -->
+                            <div class="bill-totals">
+                                <div class="bill-row">
+                                    <span>මුළු මුදල:</span>
+                                    <span class="bill-total" id="bill-total">රු. 0.00</span>
+                                </div>
+                                <div class="bill-row">
+                                    <label for="advance-payment">අත්තිකාරම්:</label>
+                                    <div class="input-small">
+                                        <span>රු.</span>
+                                        <input type="number" id="advance-payment" placeholder="0.00" step="0.01" oninput="updateBalance()">
+                                    </div>
+                                </div>
+                                <div class="bill-row bill-row-balance">
+                                    <span>ඉතිරි මුදල:</span>
+                                    <span class="bill-balance" id="bill-balance">රු. 0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="form-group">
+                                <label for="booking-notes">සටහන්</label>
+                                <textarea id="booking-notes" placeholder="අමතර සටහන්..." rows="2"></textarea>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="bill-actions">
+                                <button type="button" class="btn btn-ghost" onclick="clearBookingForm()">🗑️ මකන්න</button>
+                                <button type="button" class="btn btn-primary btn-lg" onclick="saveBooking()">💾 Booking සුරකින්න</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== BOOKINGS LIST PAGE ===== -->
+        <section class="page" id="page-bookings-list">
+            <div class="page-header">
+                <h2 class="page-title">📅 Booking බලන්න</h2>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔍 සොයන්න</h3>
+                </div>
+                <div class="card-body">
+                    <div class="search-filters">
+                        <div class="form-group">
+                            <label for="search-date">දිනය අනුව</label>
+                            <input type="text" id="search-date" class="datepicker" onchange="searchBookingsByDate()">
+                        </div>
+                        <div class="form-group">
+                            <label for="search-query">බිල්පත් අංකය / දුරකථනය / නම</label>
+                            <div class="input-with-btn">
+                                <input type="text" id="search-query" placeholder="සොයන්න...">
+                                <button type="button" class="btn btn-secondary" onclick="searchBookingsGeneral()">🔍</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-ghost" onclick="loadAllBookings()">📋 සියල්ල පෙන්වන්න</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div id="bookings-table-container">
+                        <table class="data-table" id="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>බිල්පත් අංකය</th>
+                                    <th>පාරිභෝගික නම</th>
+                                    <th>දුරකථනය</th>
+                                    <th>රැගෙන යන දිනය</th>
+                                    <th>මුළු මුදල</th>
+                                    <th>අත්තිකාරම්</th>
+                                    <th>ඉතිරි</th>
+                                    <th>තත්ත්වය</th>
+                                    <th>ක්‍රියා</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-tbody">
+                                <tr>
+                                    <td colspan="9" class="empty-cell">වෙන්කිරීම් නොමැත</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SCANNER PAGE ===== -->
+        <section class="page" id="page-scanner">
+            <div class="page-header">
+                <h2 class="page-title">🔍 බාර්කෝඩ් ස්කෑනරය</h2>
+            </div>
+
+            <div class="scanner-layout">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📷 බාර්කෝඩ් ස්කෑන් කරන්න</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="scanner-input-area">
+                            <div class="form-group">
+                                <label>බාර්කෝඩ් අංකය</label>
+                                <div class="input-with-btn">
+                                    <input type="text" id="scanner-barcode-input" placeholder="බාර්කෝඩ් ස්කෑන් කරන්න හෝ ටයිප් කරන්න" class="scanner-input">
+                                    <button type="button" class="btn btn-primary btn-lg" onclick="scanBarcode()">🔍 සොයන්න</button>
+                                </div>
+                            </div>
+                            <p class="help-text">USB බාර්කෝඩ් ස්කෑනරය මෙම කොටුවට focus කරලා ස්කෑන් කරන්න</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan Result -->
+                <div class="card" id="scan-result-card" style="display:none;">
+                    <div class="card-header">
+                        <h3>📦 ස්කෑන් ප්‍රතිඵලය</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="scan-result" id="scan-result">
+                            <div class="scan-result-saree">
+                                <img id="scan-result-img" src="" alt="" class="scan-result-img">
+                                <div class="scan-result-details">
+                                    <h3 id="scan-result-name"></h3>
+                                    <p id="scan-result-barcode" class="scan-result-barcode"></p>
+                                    <p id="scan-result-description"></p>
+                                    <p id="scan-result-price" class="scan-result-price"></p>
+                                    <div id="scan-result-status-badge" class="status-badge"></div>
+                                </div>
+                            </div>
+
+                            <!-- Booking Info (if booked) -->
+                            <div id="scan-result-booking" class="scan-result-booking" style="display:none;">
+                                <h4>📋 වෙන්කිරීම් තොරතුරු</h4>
+                                <div class="scan-booking-details">
+                                    <div class="scan-booking-row">
+                                        <span>බිල්පත් අංකය:</span>
+                                        <span id="scan-booking-bill"></span>
+                                    </div>
+                                    <div class="scan-booking-row">
+                                        <span>පාරිභෝගිකයා:</span>
+                                        <span id="scan-booking-customer"></span>
+                                    </div>
+                                    <div class="scan-booking-row">
+                                        <span>දුරකථනය:</span>
+                                        <span id="scan-booking-phone"></span>
+                                    </div>
+                                    <div class="scan-booking-row">
+                                        <span>රැගෙන යන දිනය:</span>
+                                        <span id="scan-booking-date"></span>
+                                    </div>
+                                    <div class="scan-booking-row">
+                                        <span>තත්ත්වය:</span>
+                                        <span id="scan-booking-status"></span>
+                                    </div>
+                                </div>
+                                <button id="scan-view-booking-btn" class="btn btn-primary" style="margin-top: 15px; width: 100%; display: none;">🧾 බිල්පත බලන්න</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== BOOKING DETAIL MODAL ===== -->
+        <div class="modal-overlay" id="booking-detail-modal" style="display:none;" onclick="closeBookingDetail(event)">
+            <div class="modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>🧾 Booking විස්තර</h3>
+                    <button class="btn btn-ghost" onclick="closeBookingDetail()">✕</button>
+                </div>
+                <div class="modal-body" id="booking-detail-content">
+                    <!-- Filled dynamically -->
+                </div>
+                <div class="modal-footer" id="booking-detail-footer">
+                    <!-- Filled dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ITEM DETAIL MODAL ===== -->
+        <div class="modal-overlay" id="item-detail-modal" style="display:none;" onclick="closeItemDetail(event)">
+            <div class="modal modal-sm" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>👗 සාරි විස්තර</h3>
+                    <button class="btn btn-ghost" onclick="closeItemDetail()">✕</button>
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    <img id="item-detail-img" src="" alt="" style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); margin-bottom: 15px; display: none;">
+                    <h4 id="item-detail-name" style="font-size: 18px; margin-bottom: 5px;"></h4>
+                    <p id="item-detail-barcode" style="font-family: monospace; color: var(--primary-light);"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="closeItemDetail()">වසන්න</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BARCODE PRINT MODAL ===== -->
+        <div class="modal-overlay" id="barcode-print-modal" style="display:none;" onclick="closeBarcodePrint(event)">
+            <div class="modal modal-sm" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>🖨️ බාර්කෝඩ් මුද්‍රණය</h3>
+                    <button class="btn btn-ghost" onclick="closeBarcodePrint()">✕</button>
+                </div>
+                <div class="modal-body" id="barcode-print-content">
+                    <div class="barcode-print-area" id="barcode-print-area">
+                        <div class="barcode-label">
+                            <div class="barcode-label-name" id="print-saree-name"></div>
+                            <svg id="print-barcode-svg"></svg>
+                            <div class="barcode-label-code" id="print-barcode-code"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="closeBarcodePrint()">වසන්න</button>
+                    <button class="btn btn-primary" onclick="printBarcodeLabel()">🖨️ මුද්‍රණය කරන්න</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== NOTIFICATION ===== -->
+        <div class="notification" id="notification" style="display:none;">
+            <span class="notification-icon" id="notification-icon"></span>
+            <span class="notification-text" id="notification-text"></span>
+        </div>
+    </main>
+
+    <!-- Offline Libraries -->
+    <script src="/scripts/jsbarcode/dist/JsBarcode.all.min.js"></script>
+    <link rel="stylesheet" href="/scripts/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="/scripts/flatpickr/dist/themes/dark.css">
+    <script src="/scripts/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/inventory.js"></script>
+    <script src="/js/booking.js"></script>
+    <script src="/js/scanner.js"></script>
+    <script src="/js/reports.js"></script>
+</body>
+</html>
